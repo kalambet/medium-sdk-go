@@ -83,6 +83,7 @@ type CreatePostOptions struct {
 	CanonicalURL  string        `json:"canonicalUrl,omitempty"`
 	PublishStatus publishStatus `json:"publishStatus,omitempty"`
 	License       license       `json:"license,omitempty"`
+	PublicationID string        `json:"publicationId,omitempty"`
 }
 
 // UploadOptions defines the options for uploading files to Medium.
@@ -108,6 +109,32 @@ type User struct {
 	Name     string `json:"name"`
 	URL      string `json:"url"`
 	ImageURL string `json:"imageUrl"`
+}
+
+// Publications inherit all Medium user publications
+type Publications struct {
+	Data []Publication `json:"data"`
+}
+
+// Publication defines a Medium user publication
+type Publication struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	URL         string `json:"url"`
+	ImageURL    string `json:"imageUrl"`
+}
+
+// Contributors inherit all Medium publication contributors
+type Contributors struct {
+	Data []Contributor `json:"data"`
+}
+
+// Contributor defines a Medium publication contributor
+type Contributor struct {
+	PublicationID string `json:"publicationID"`
+	UserID        string `json:"userID"`
+	Role          string `json:"role"`
 }
 
 // Post defines a Medium post
@@ -224,12 +251,45 @@ func (m *Medium) GetUser() (*User, error) {
 	return u, err
 }
 
+// GetPublications gets user publications by the current AccessToken.
+// This requires m.AccessToken to have the BasicPublications scope.
+func (m *Medium) GetPublications(userID string) (*Publications, error) {
+	r := clientRequest{
+		method: "GET",
+		path:   fmt.Sprintf("/v1/users/%s/publications", userID),
+	}
+	p := &Publications{}
+	err := m.request(r, p)
+	return p, err
+}
+
+// GetContributors gets contributors for givaen a publication
+// by the current AccessToken.
+// This requires m.AccessToken to have the BasicPublications scope.
+func (m *Medium) GetContributors(publicationID string) (*Contributors, error) {
+	r := clientRequest{
+		method: "GET",
+		path:   fmt.Sprintf("/v1/publications/%s/contributors", publicationID),
+	}
+	p := &Contributors{}
+	err := m.request(r, p)
+	return p, err
+}
+
 // CreatePost creates a post on the profile identified by the current AccessToken.
 // This requires m.AccessToken to have the PublishPost scope.
 func (m *Medium) CreatePost(o CreatePostOptions) (*Post, error) {
+	postURL := "/v1/users/%s/posts"
+	postID := o.UserID
+
+	if o.PublicationID != "" {
+		postURL = "/v1/publications/%s/posts"
+		postID = o.PublicationID
+	}
+
 	r := clientRequest{
 		method: "POST",
-		path:   fmt.Sprintf("/v1/users/%s/posts", o.UserID),
+		path:   fmt.Sprintf(postURL, postID),
 		data:   o,
 	}
 	p := &Post{}
