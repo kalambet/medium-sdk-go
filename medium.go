@@ -39,6 +39,11 @@ const (
 	PublishStatusPublic                 = "public"
 )
 
+const (
+	ContributerRoleEditor role = "editor"
+	ContributerRoleWriter      = "writer"
+)
+
 // Licenses that are available when creating a post on Medium.
 const (
 	LicenseAllRightsReserved license = "all-rights-reserved"
@@ -84,6 +89,7 @@ type CreatePostOptions struct {
 	PublishStatus publishStatus `json:"publishStatus,omitempty"`
 	License       license       `json:"license,omitempty"`
 	PublicationID string        `json:"publicationId,omitempty"`
+	PublishedAt   string        `json:"publishedAt"`
 }
 
 // UploadOptions defines the options for uploading files to Medium.
@@ -111,10 +117,7 @@ type User struct {
 	ImageURL string `json:"imageUrl"`
 }
 
-// Publications inherit all Medium user publications
-type Publications struct {
-	Data []Publication `json:"data"`
-}
+type Publications []*Publication
 
 // Publication defines a Medium user publication
 type Publication struct {
@@ -125,10 +128,7 @@ type Publication struct {
 	ImageURL    string `json:"imageUrl"`
 }
 
-// Contributors inherit all Medium publication contributors
-type Contributors struct {
-	Data []Contributor `json:"data"`
-}
+type Contributors []*Contributor
 
 // Contributor defines a Medium publication contributor
 type Contributor struct {
@@ -271,9 +271,9 @@ func (m *Medium) GetContributors(publicationID string) (*Contributors, error) {
 		method: "GET",
 		path:   fmt.Sprintf("/v1/publications/%s/contributors", publicationID),
 	}
-	p := &Contributors{}
-	err := m.request(r, p)
-	return p, err
+	c := &Contributors{}
+	err := m.request(r, c)
+	return c, err
 }
 
 // CreatePost creates a post on the profile identified by the current AccessToken.
@@ -458,6 +458,7 @@ type contentFormat string
 type publishStatus string
 type license string
 type scope string
+type role string
 
 // clientRequest defines information that can be used to make a request to Medium.
 type clientRequest struct {
