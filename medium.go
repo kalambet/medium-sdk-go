@@ -80,16 +80,17 @@ type fileOpener interface {
 
 // CreatePostOptions defines the options for creating a post on Medium.
 type CreatePostOptions struct {
-	UserID        string        `json:"-"`
-	Title         string        `json:"title"`
-	Content       string        `json:"content"`
-	ContentFormat contentFormat `json:"contentFormat"`
-	Tags          []string      `json:"tags,omitempty"`
-	CanonicalURL  string        `json:"canonicalUrl,omitempty"`
-	PublishStatus publishStatus `json:"publishStatus,omitempty"`
-	License       license       `json:"license,omitempty"`
-	PublicationID string        `json:"publicationId,omitempty"`
-	PublishedAt   string        `json:"publishedAt"`
+	UserID          string        `json:"-"`
+	Title           string        `json:"title"`
+	Content         string        `json:"content"`
+	ContentFormat   contentFormat `json:"contentFormat"`
+	Tags            []string      `json:"tags,omitempty"`
+	CanonicalURL    string        `json:"canonicalUrl,omitempty"`
+	PublishStatus   publishStatus `json:"publishStatus,omitempty"`
+	License         license       `json:"license,omitempty"`
+	PublicationID   string        `json:"publicationId,omitempty"`
+	PublishedAt     string        `json:"publishedAt"`
+	NotifyFollowers bool          `json:"notifyFollowers"`
 }
 
 // UploadOptions defines the options for uploading files to Medium.
